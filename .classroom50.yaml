@@ -1,0 +1,12 @@
+schema: "classroom50/repo-config/v1"
+classroom: "503cp69"
+assignment: "a7-2"
+owner:
+  username: "6870402021"
+  id: 255824842
+  accepted_at: "2026-09-24T13:23:41Z"
+source:
+  owner: "nuengwong"
+  owner_id: 83861652
+  repo: "503a72autograde"
+  branch: "main"
