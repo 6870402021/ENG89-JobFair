@@ -112,19 +112,24 @@ exports.updateHospital= async (req, res,next)  => {
     }
 }
 
+const Appointment = require('../models/Appointment.js');
+
 //@desc Delete a hospital
 //@route DELETE /api/v1/hospitals/:id
 //@access Private
 exports.deleteHospital= async (req, res,next)  => {
     try {
-        const hospital = await Hospital.findByIdAndDelete(req.params.id);
+        const hospital = await Hospital.findById(req.params.id);
+
         if (!hospital) {
-            return res.status(400).json({success: false});
+            return res.status(400).json({success: false, message: 'Hospital not found'});
         }
-        
+        await Appointment.deleteMany({hospital: req.params.id});
+        await Hospital.deleteOne({_id: req.params.id});
+
         res.status(200).json({success: true, data: {}});
 
     } catch (err) {
-        res.status(400).json({success: false});
+        res.status(400).json({success: false, message: 'Failed to delete hospital'});
     }
 }
