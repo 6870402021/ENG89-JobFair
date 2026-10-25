@@ -1,6 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const connectDB = require('./config/db');
 
 //Load env vars
@@ -15,6 +16,9 @@ const auth = require('./routes/auth');
 const app = express();
 const appointments = require('./routes/appointments');
 app.set('query parser', 'extended');
+
+//Enable CORS so the React frontend can call the API
+app.use(cors());
 
 //Body parser
 app.use(express.json());
