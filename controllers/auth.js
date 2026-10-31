@@ -32,6 +32,8 @@ exports.register = async (req, res, next) => {
 // @route   POST /api/v1/auth/login
 // @access  Public
 exports.login = async (req, res, next) => {
+    try {
+
     const { email, password } = req.body;
     // Validate email & password
     if (!email || !password) {
@@ -56,6 +58,12 @@ exports.login = async (req, res, next) => {
         // token
     // });
     sendTokenResponse(user, 200, res);
+    }
+    catch (err) {
+        res.status(401).json({
+            success: false, msg: 'Cannot convert email or password to string'
+        });
+    }
 };
 
 // Get token from model, create cookie and send response
@@ -91,5 +99,20 @@ exports.getMe = async (req, res, next) => {
     res.status(200).json({
         success: true,
         data: user
+    });
+};
+
+// @desc    Log user out / clear cookie
+// @route   GET /api/v1/auth/logout
+// @access  Private
+exports.logout = async (req, res, next) => {
+    res.cookie('token', 'none', {
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true
+    });
+
+    res.status(200).json({
+        success: true,
+        data: {}
     });
 };
