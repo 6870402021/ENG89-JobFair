@@ -7,6 +7,8 @@ const connectDB = require('./config/db');
 const helmet = require('helmet');
 const { xss } = require('express-xss-sanitizer');
 const rateLimit = require('express-rate-limit');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUI = require('swagger-ui-express');
 
 //Load env vars
 dotenv.config({path: './config/config.env'});
@@ -44,6 +46,26 @@ const limiter = rateLimit({
     max: 100
 });
 app.use(limiter);
+
+//Swagger API docs
+const swaggerOptions = {
+    swaggerDefinition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Library API',
+            version: '1.0.0',
+            description: 'A simple Express VacQ API'
+        },
+        servers: [
+            {
+                url: `http://localhost:${process.env.PORT || 5003}/api/v1`
+            }
+        ],
+    },
+    apis: ['./routes/*.js'],
+};
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 app.use('/api/v1/auth', auth);
 app.use('/api/v1/hospitals', hospitals);
