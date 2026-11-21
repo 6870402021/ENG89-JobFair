@@ -17,10 +17,10 @@ dotenv.config({path: './config/config.env'});
 connectDB();
 
 //Route files
-const hospitals = require('./routes/hospitals');
+const companies = require('./routes/companies');
+const interviews = require('./routes/interviews');
 const auth = require('./routes/auth');
 const app = express();
-const appointments = require('./routes/appointments');
 app.set('query parser', 'extended');
 
 //Enable CORS so the React frontend can call the API
@@ -52,9 +52,9 @@ const swaggerOptions = {
     swaggerDefinition: {
         openapi: '3.0.0',
         info: {
-            title: 'Library API',
+            title: 'Online Job Fair Registration API',
             version: '1.0.0',
-            description: 'A simple Express VacQ API'
+            description: 'Register, browse companies, and book up to 3 interview sessions (May 10th - 13th, 2022)'
         },
         servers: [
             {
@@ -68,8 +68,8 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 app.use('/api/v1/auth', auth);
-app.use('/api/v1/hospitals', hospitals);
-app.use('/api/v1/appointments', appointments);
+app.use('/api/v1/companies', companies);
+app.use('/api/v1/interviews', interviews);
 
 const PORT = process.env.PORT || 5003;
 
@@ -81,9 +81,3 @@ process.on('unhandledRejection', (err, promise) => {
     //Close server & exit process
     server.close(() => process.exit(1));
 });
-
-// dotenv.config({path: './config/config.env'});
-
-// app.use('/api/v1/hospitals', hospitals);
-
-// app.listen(PORT,console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));

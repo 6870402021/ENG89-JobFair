@@ -1,0 +1,2438 @@
+{
+    "info": {
+        "name": "Online Job Fair Registration API",
+        "description": "Project #3 - Online Job Fair Registration.\n\nRun the whole collection in order (Runner or `newman run`). It registers its own admin and two users with unique emails each run, so it does not depend on existing data. The last folder deletes the companies it created (which also deletes their interview sessions).\n\nInterview dates must be during May 10th - 13th, 2022. A user may book at most 3 interview sessions.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Non-functional requirement: respond within 3 seconds",
+                    "pm.test(\"Response time < 3000ms\", () => pm.expect(pm.response.responseTime).to.be.below(3000));"
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "URL",
+            "value": "http://localhost:5003"
+        },
+        {
+            "key": "RUN_ID",
+            "value": ""
+        },
+        {
+            "key": "ADMIN_TOKEN",
+            "value": ""
+        },
+        {
+            "key": "USER_TOKEN",
+            "value": ""
+        },
+        {
+            "key": "USER2_TOKEN",
+            "value": ""
+        },
+        {
+            "key": "USER_EMAIL",
+            "value": ""
+        },
+        {
+            "key": "COMPANY1_ID",
+            "value": ""
+        },
+        {
+            "key": "COMPANY2_ID",
+            "value": ""
+        },
+        {
+            "key": "COMPANY3_ID",
+            "value": ""
+        },
+        {
+            "key": "COMPANY4_ID",
+            "value": ""
+        },
+        {
+            "key": "INTERVIEW1_ID",
+            "value": ""
+        },
+        {
+            "key": "INTERVIEW2_ID",
+            "value": ""
+        },
+        {
+            "key": "INTERVIEW3_ID",
+            "value": ""
+        },
+        {
+            "key": "USER2_INTERVIEW_ID",
+            "value": ""
+        }
+    ],
+    "item": [
+        {
+            "name": "1. Register",
+            "description": "Req 1: register with name, telephone number, email and password.",
+            "item": [
+                {
+                    "name": "Register Admin",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const runId = \"jf\" + Date.now();",
+                                    "pm.collectionVariables.set(\"RUN_ID\", runId);",
+                                    "pm.collectionVariables.set(\"USER_EMAIL\", runId + \".user@test.com\");"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                                    "pm.test(\"Token returned\", () => pm.expect(pm.response.json().token).to.be.a(\"string\"));",
+                                    "pm.collectionVariables.set(\"ADMIN_TOKEN\", pm.response.json().token);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/auth/register",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Job Fair Admin\",\n    \"tel\": \"0800000000\",\n    \"email\": \"{{RUN_ID}}.admin@test.com\",\n    \"password\": \"12345678\",\n    \"role\": \"admin\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Register User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                                    "pm.test(\"Name, tel and email returned\", () => {",
+                                    "    const r = pm.response.json();",
+                                    "    pm.expect(r.name).to.eql(\"Somchai Jaidee\");",
+                                    "    pm.expect(r.tel).to.eql(\"0812345678\");",
+                                    "    pm.expect(r.email).to.eql(pm.collectionVariables.get(\"USER_EMAIL\"));",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/auth/register",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Somchai Jaidee\",\n    \"tel\": \"0812345678\",\n    \"email\": \"{{USER_EMAIL}}\",\n    \"password\": \"12345678\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Register User 2",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                                    "pm.collectionVariables.set(\"USER2_TOKEN\", pm.response.json().token);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/auth/register",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Somying Rakdee\",\n    \"tel\": \"0898765432\",\n    \"email\": \"{{RUN_ID}}.user2@test.com\",\n    \"password\": \"12345678\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Register without telephone (expect 400)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));",
+                                    "pm.test(\"Success is false\", () => pm.expect(pm.response.json().success).to.be.false);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/auth/register",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"No Phone\",\n    \"email\": \"{{RUN_ID}}.notel@test.com\",\n    \"password\": \"12345678\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Register duplicate email (expect 400)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/auth/register",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Duplicate\",\n    \"tel\": \"0811111111\",\n    \"email\": \"{{USER_EMAIL}}\",\n    \"password\": \"12345678\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "2. Login / Logout",
+            "description": "Req 2: log in with email and password; log out.",
+            "item": [
+                {
+                    "name": "Login User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Token returned\", () => pm.expect(pm.response.json().token).to.be.a(\"string\"));",
+                                    "pm.collectionVariables.set(\"USER_TOKEN\", pm.response.json().token);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/auth/login",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"{{USER_EMAIL}}\",\n    \"password\": \"12345678\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login wrong password (expect 401)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 401\", () => pm.response.to.have.status(401));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/auth/login",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"{{USER_EMAIL}}\",\n    \"password\": \"wrongpassword\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Me",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Logged-in user returned\", () => pm.expect(pm.response.json().data.email).to.eql(pm.collectionVariables.get(\"USER_EMAIL\")));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/auth/me",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Me without token (expect 401)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 401\", () => pm.response.to.have.status(401));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/auth/me",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Success is true\", () => pm.expect(pm.response.json().success).to.be.true);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/auth/logout",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "3a. Companies",
+            "description": "Req 3: the company list is provided. Company info: name, address, website, description, telephone number. Only admin can manage companies.",
+            "item": [
+                {
+                    "name": "Create Company 1 (admin)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                                    "pm.test(\"Company has all required fields\", () => {",
+                                    "    const d = pm.response.json().data;",
+                                    "    [\"name\", \"address\", \"website\", \"description\", \"tel\"].forEach(f => pm.expect(d).to.have.property(f));",
+                                    "});",
+                                    "pm.collectionVariables.set(\"COMPANY1_ID\", pm.response.json().data._id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{RUN_ID}} Company 1\",\n    \"address\": \"19 Rama IV Rd, Pathum Wan, Bangkok 10330\",\n    \"website\": \"https://company1.example.com\",\n    \"description\": \"Company 1 is hiring software engineers\",\n    \"tel\": \"02-123-4561\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Company 2 (admin)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                                    "pm.test(\"Company has all required fields\", () => {",
+                                    "    const d = pm.response.json().data;",
+                                    "    [\"name\", \"address\", \"website\", \"description\", \"tel\"].forEach(f => pm.expect(d).to.have.property(f));",
+                                    "});",
+                                    "pm.collectionVariables.set(\"COMPANY2_ID\", pm.response.json().data._id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{RUN_ID}} Company 2\",\n    \"address\": \"29 Rama IV Rd, Pathum Wan, Bangkok 10330\",\n    \"website\": \"https://company2.example.com\",\n    \"description\": \"Company 2 is hiring software engineers\",\n    \"tel\": \"02-123-4562\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Company 3 (admin)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                                    "pm.test(\"Company has all required fields\", () => {",
+                                    "    const d = pm.response.json().data;",
+                                    "    [\"name\", \"address\", \"website\", \"description\", \"tel\"].forEach(f => pm.expect(d).to.have.property(f));",
+                                    "});",
+                                    "pm.collectionVariables.set(\"COMPANY3_ID\", pm.response.json().data._id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{RUN_ID}} Company 3\",\n    \"address\": \"39 Rama IV Rd, Pathum Wan, Bangkok 10330\",\n    \"website\": \"https://company3.example.com\",\n    \"description\": \"Company 3 is hiring software engineers\",\n    \"tel\": \"02-123-4563\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Company 4 (admin)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                                    "pm.test(\"Company has all required fields\", () => {",
+                                    "    const d = pm.response.json().data;",
+                                    "    [\"name\", \"address\", \"website\", \"description\", \"tel\"].forEach(f => pm.expect(d).to.have.property(f));",
+                                    "});",
+                                    "pm.collectionVariables.set(\"COMPANY4_ID\", pm.response.json().data._id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{RUN_ID}} Company 4\",\n    \"address\": \"49 Rama IV Rd, Pathum Wan, Bangkok 10330\",\n    \"website\": \"https://company4.example.com\",\n    \"description\": \"Company 4 is hiring software engineers\",\n    \"tel\": \"02-123-4564\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Company as user (expect 403)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 403\", () => pm.response.to.have.status(403));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{RUN_ID}} Company 9\",\n    \"address\": \"99 Rama IV Rd, Pathum Wan, Bangkok 10330\",\n    \"website\": \"https://company9.example.com\",\n    \"description\": \"Company 9 is hiring software engineers\",\n    \"tel\": \"02-123-4569\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Company missing fields (expect 400)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{RUN_ID}} Incomplete Co\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Companies",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Data is a non-empty array\", () => {",
+                                    "    const r = pm.response.json();",
+                                    "    pm.expect(r.data).to.be.an(\"array\").that.is.not.empty;",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get One Company",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Correct company returned\", () => pm.expect(pm.response.json().data._id).to.eql(pm.collectionVariables.get(\"COMPANY1_ID\")));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY1_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY1_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Company (admin)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Description updated\", () => pm.expect(pm.response.json().data.description).to.eql(\"Now also hiring data engineers\"));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY1_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY1_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"description\": \"Now also hiring data engineers\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "3b. Book Interview Sessions",
+            "description": "Req 3: book up to 3 interview sessions, dated May 10th - 13th, 2022, with preferred companies.",
+            "item": [
+                {
+                    "name": "Book Interview 1 (May 10)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                                    "pm.test(\"Booked with company 1\", () => pm.expect(pm.response.json().data.company).to.eql(pm.collectionVariables.get(\"COMPANY1_ID\")));",
+                                    "pm.collectionVariables.set(\"INTERVIEW1_ID\", pm.response.json().data._id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY1_ID}}/interviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY1_ID}}",
+                                "interviews"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"interviewDate\": \"2022-05-10T09:00:00.000Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Book Interview 2 (May 11)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                                    "pm.collectionVariables.set(\"INTERVIEW2_ID\", pm.response.json().data._id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY2_ID}}/interviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY2_ID}}",
+                                "interviews"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"interviewDate\": \"2022-05-11T13:00:00.000Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Book Interview 3 (May 13)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                                    "pm.collectionVariables.set(\"INTERVIEW3_ID\", pm.response.json().data._id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY3_ID}}/interviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY3_ID}}",
+                                "interviews"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"interviewDate\": \"2022-05-13T15:00:00.000Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Book 4th Interview (expect 400)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));",
+                                    "pm.test(\"Limit message\", () => pm.expect(pm.response.json().message).to.include(\"3\"));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY4_ID}}/interviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY4_ID}}",
+                                "interviews"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"interviewDate\": \"2022-05-12T09:00:00.000Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Book date before fair (expect 400)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY4_ID}}/interviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY4_ID}}",
+                                "interviews"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER2_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"interviewDate\": \"2022-05-09T09:00:00.000Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Book date after fair (expect 400)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY4_ID}}/interviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY4_ID}}",
+                                "interviews"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER2_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"interviewDate\": \"2022-05-14T09:00:00.000Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Book without login (expect 401)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 401\", () => pm.response.to.have.status(401));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY4_ID}}/interviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY4_ID}}",
+                                "interviews"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"interviewDate\": \"2022-05-12T09:00:00.000Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "User 2 books Interview (May 12)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                                    "pm.collectionVariables.set(\"USER2_INTERVIEW_ID\", pm.response.json().data._id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY4_ID}}/interviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY4_ID}}",
+                                "interviews"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER2_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"interviewDate\": \"2022-05-12T10:00:00.000Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "4-6. User manages own bookings",
+            "description": "Req 4-6: the registered user views, edits and deletes their own interview sessions, and cannot touch other users' bookings.",
+            "item": [
+                {
+                    "name": "View my interviews",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Exactly my 3 bookings\", () => pm.expect(pm.response.json().count).to.eql(3));",
+                                    "pm.test(\"Company info is populated\", () => pm.expect(pm.response.json().data[0].company).to.have.property(\"name\"));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "View one of my interviews",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews/{{INTERVIEW1_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews",
+                                "{{INTERVIEW1_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "View another user's interview (expect 403)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 403\", () => pm.response.to.have.status(403));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews/{{USER2_INTERVIEW_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews",
+                                "{{USER2_INTERVIEW_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Edit my interview (date + company)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Date and company updated\", () => {",
+                                    "    const d = pm.response.json().data;",
+                                    "    pm.expect(d.interviewDate).to.eql(\"2022-05-12T14:00:00.000Z\");",
+                                    "    pm.expect(d.company).to.eql(pm.collectionVariables.get(\"COMPANY4_ID\"));",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews/{{INTERVIEW1_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews",
+                                "{{INTERVIEW1_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"interviewDate\": \"2022-05-12T14:00:00.000Z\",\n    \"company\": \"{{COMPANY4_ID}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Edit my interview to date outside fair (expect 400)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews/{{INTERVIEW1_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews",
+                                "{{INTERVIEW1_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"interviewDate\": \"2022-06-01T10:00:00.000Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Edit another user's interview (expect 403)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 403\", () => pm.response.to.have.status(403));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews/{{USER2_INTERVIEW_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews",
+                                "{{USER2_INTERVIEW_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"interviewDate\": \"2022-05-10T10:00:00.000Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete another user's interview (expect 403)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 403\", () => pm.response.to.have.status(403));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews/{{USER2_INTERVIEW_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews",
+                                "{{USER2_INTERVIEW_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete my interview",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews/{{INTERVIEW2_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews",
+                                "{{INTERVIEW2_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get deleted interview (expect 404)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 404\", () => pm.response.to.have.status(404));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews/{{INTERVIEW2_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews",
+                                "{{INTERVIEW2_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "View my interviews after delete",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"2 bookings left\", () => pm.expect(pm.response.json().count).to.eql(2));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "7-9. Admin manages any booking",
+            "description": "Req 7-9: the admin views, edits and deletes any interview session.",
+            "item": [
+                {
+                    "name": "Admin views all interviews",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Includes bookings from both users\", () => {",
+                                    "    const ids = pm.response.json().data.map(i => i._id);",
+                                    "    pm.expect(ids).to.include(pm.collectionVariables.get(\"INTERVIEW1_ID\"));",
+                                    "    pm.expect(ids).to.include(pm.collectionVariables.get(\"USER2_INTERVIEW_ID\"));",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Admin views a user's interview",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews/{{USER2_INTERVIEW_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews",
+                                "{{USER2_INTERVIEW_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Admin edits any interview",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Date updated\", () => pm.expect(pm.response.json().data.interviewDate).to.eql(\"2022-05-13T09:00:00.000Z\"));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews/{{USER2_INTERVIEW_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews",
+                                "{{USER2_INTERVIEW_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"interviewDate\": \"2022-05-13T09:00:00.000Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Admin deletes any interview",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews/{{USER2_INTERVIEW_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews",
+                                "{{USER2_INTERVIEW_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get admin-deleted interview (expect 404)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 404\", () => pm.response.to.have.status(404));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews/{{USER2_INTERVIEW_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews",
+                                "{{USER2_INTERVIEW_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Cleanup",
+            "description": "Deletes the companies created by this run. Their remaining interview sessions are deleted with them.",
+            "item": [
+                {
+                    "name": "Delete Company 1 (admin)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY1_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY1_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Company 2 (admin)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY2_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY2_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Company 3 (admin)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY3_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY3_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Company 4 (admin)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY4_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY4_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{ADMIN_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get deleted company (expect 404)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 404\", () => pm.response.to.have.status(404));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/companies/{{COMPANY1_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "companies",
+                                "{{COMPANY1_ID}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "My interviews removed with companies",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"No bookings left\", () => pm.expect(pm.response.json().count).to.eql(0));"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{URL}}/api/v1/interviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "interviews"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{USER_TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}

@@ -7,6 +7,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please add a name']
     },
+    tel: {
+        type: String,
+        required: [true, 'Please add a telephone number'],
+        match: [/^\+?[0-9\- ]{9,15}$/, 'Please add a valid telephone number']
+    },
     email: {
         type: String,
         required: [true, 'Please add an email'],
@@ -36,7 +41,9 @@ const UserSchema = new mongoose.Schema({
 });
 
 // Encrypt password using bcrypt
-UserSchema.pre('save', async function(next) {
+UserSchema.pre('save', async function() {
+    // Only hash when the password was set or changed
+    if (!this.isModified('password')) return;
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });

@@ -5,10 +5,11 @@ const User= require('../models/User');
 // @access  Public
 exports.register = async (req, res, next) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, tel, email, password, role } = req.body;
         // Create user
         const user = await User.create({
             name,
+            tel,
             email,
             password,
             role
@@ -22,7 +23,8 @@ exports.register = async (req, res, next) => {
         sendTokenResponse(user, 201, res);
     } catch (err) {
         res.status(400).json({
-            success: false
+            success: false,
+            msg: err.code === 11000 ? 'Email is already registered' : err.message
         });
         console.log(err.stack);
     }
@@ -85,6 +87,7 @@ const sendTokenResponse = (user, statusCode, res) => {
         //add for frontend
         _id: user._id,
         name: user.name,
+        tel: user.tel,
         email: user.email,
         //end for frontend
         token
