@@ -40,10 +40,10 @@ app.use(helmet());
 
 app.use(xss());
 
-//Rate limiting
+//Rate limiting (override with RATE_LIMIT_MAX in config.env, e.g. for Postman Runner demos)
 const limiter = rateLimit({
     windowMs: 10 * 60 * 1000, //10 mins
-    max: 100
+    max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 100
 });
 app.use(limiter);
 
